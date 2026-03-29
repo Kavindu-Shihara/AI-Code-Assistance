@@ -1,0 +1,179 @@
+<!-- 
+  CodeX - AI Code Assistant Application
+  This application provides AI-powered code analysis and formatting
+  Features: Code analysis, formatting, language support (JS, Python, C++, Java, HTML, CSS)
+-->
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CodeX - AI Assistant</title>
+    
+    <!-- Google Fonts: JetBrains Mono (code editor) & Poppins (UI) -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&family=Poppins:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    
+    <!-- CodeMirror: Syntax-highlighting code editor library -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css"
+    />
+    <!-- CodeMirror Dracula Theme: Dark color scheme for code editor -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/dracula.min.css"
+    />
+    
+    <!-- Font Awesome Icons: For UI buttons and visual elements -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <!-- Custom CSS styles for the application -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Main wrapper container for the entire application -->
+    <div class="wrapper">
+      <!-- Header section with logo and branding -->
+      <header class="app-header">
+        <div class="header-content">
+          <!-- Application logo and title -->
+          <div class="logo-section">
+            <i class="fas fa-brain"></i><!-- Brain icon for AI theme -->
+            <h1>CodeX AI Assistant</h1>
+          </div>
+          <!-- Application tagline -->
+          <p class="tagline">Smart Code Analysis & Suggestions</p>
+        </div>
+      </header>
+
+      <!-- Main content container -->
+      <div class="container">
+        <!-- API Configuration Section: Allows users to input and save their OpenRouter API key -->
+        <section class="api-config">
+          <div class="api-input-group">
+            <!-- Label for API key input -->
+            <label for="apiKey">OpenRouter API Key:</label>
+            <!-- Password input field: maskes the API key for security -->
+            <input
+              type="password"
+              id="apiKey"
+              placeholder="Enter your OpenRouter API key..."
+            />
+            <!-- Button to save the API key to browser storage -->
+            <button id="saveApiBtn" class="btn btn-success">
+              <i class="fas fa-save"></i> Save API
+            </button>
+            <!-- Button to clear the saved API key -->
+            <button id="clearApiBtn" class="btn btn-warning">
+              <i class="fas fa-times"></i> Clear
+            </button>
+            <!-- Status indicator for API save/clear operations -->
+            <span id="apiStatus" class="api-status"></span>
+          </div>
+        </section>
+        
+        <!-- Code and Analysis Control Buttons Section -->
+        <section class="controls">
+          <!-- Language selector dropdown -->
+          <div class="control-group">
+            <label for="language">Language:</label>
+            <select id="language">
+              <option value="javascript">JavaScript</option>
+              <option value="python">Python</option>
+              <option value="cpp">C++</option>
+              <option value="java">Java</option>
+              <option value="html">HTML</option>
+              <option value="css">CSS</option>
+            </select>
+          </div>
+          
+          <!-- Primary action button: Sends code to AI for analysis -->
+          <button id="checkCode" class="btn btn-primary">
+            <i class="fas fa-check-circle"></i> Analyze
+          </button>
+          
+          <!-- Secondary action button: Formats the code (removes extra spaces) -->
+          <button id="formatCode" class="btn btn-secondary">
+            <i class="fas fa-indent"></i> Format
+          </button>
+          
+          <!-- Danger action button: Clears all content from editor -->
+          <button id="clearCode" class="btn btn-danger">
+            <i class="fas fa-trash"></i> Clear
+          </button>
+        </section>
+
+        <!-- Two-column layout: editor on left, AI response on right -->
+        <div class="main-content">
+          <!-- Left Panel: Code Input Editor -->
+          <section class="editor-panel">
+            <div class="panel-header">
+              <h2><i class="fas fa-code"></i> Code Input</h2>
+            </div>
+            <!-- Textarea for code input (converted to CodeMirror editor by JavaScript) -->
+            <textarea
+              id="code"
+              placeholder="// Write your code here..."
+            ></textarea>
+          </section>
+
+          <!-- Right Panel: AI Analysis Response -->
+          <section class="response-panel">
+            <div class="panel-header">
+              <h2><i class="fas fa-lightbulb"></i> AI Response</h2>
+            </div>
+
+            <!-- Container for all response sections -->
+            <div class="response-content">
+              <!-- First response section: AI Analysis and feedback -->
+              <div class="response-section">
+                <div class="section-header">
+                  <h3>Analysis</h3>
+                  <!-- Status indicator showing if analysis is ready -->
+                  <span class="section-status" id="analysisStatus"></span>
+                </div>
+                <!-- Output area where AI analysis results are displayed -->
+                <pre id="output" class="response-text">Enter code and click Analyze to get AI suggestions...</pre>
+                <!-- Copy button for analysis (hidden until analysis is complete) -->
+                <button class="copy-btn" id="copyOutput" style="display: none">
+                  <i class="fas fa-copy"></i> Copy Analysis
+                </button>
+              </div>
+
+              <!-- Second response section: Correct answer/improved code -->
+              <div class="response-section">
+                <div class="section-header">
+                  <h3>Correct Answer</h3>
+                  <!-- Status indicator showing if corrected code is ready -->
+                  <span class="section-status" id="answerStatus"></span>
+                </div>
+                <!-- Output area where corrected/improved code is displayed -->
+                <div id="fixSection" class="response-text">
+                  Optimized solutions will appear here...
+                </div>
+                <button class="copy-btn" id="copyAnswer" style="display: none">
+                  <i class="fas fa-copy"></i> Copy Answer
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <!-- CodeMirror JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/clike/clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/css/css.min.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
